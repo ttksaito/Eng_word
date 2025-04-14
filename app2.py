@@ -131,14 +131,11 @@ if os.path.exists(excel_file):
             audio_col, button_col = st.columns([1, 1])
 
             with audio_col:
-                try:
-                    tts = gTTS(sentence, lang='en')
-                    audio_bytes = BytesIO()
-                    tts.write_to_fp(audio_bytes)
-                    audio_bytes.seek(0)
-                    st.audio(audio_bytes, format='audio/mp3')
-                except Exception as e:
-                    st.error(f"音声の生成に失敗しました: {e}")
+                # gTTSでメモリ上に音声生成
+                tts = gTTS(sentence, lang='en')
+                audio_bytes = BytesIO()
+                tts.write_to_fp(audio_bytes)
+                audio_bytes.seek(0)
 
                 st.audio(audio_bytes, format='audio/mp3')
             
