@@ -4,6 +4,8 @@ from gtts import gTTS
 import tempfile
 import os
 import datetime
+from io import BytesIO
+
 
 st.title("📚 英語例文学習アプリ")
 excel_file = "duo3.xlsx"
@@ -121,16 +123,25 @@ if os.path.exists(excel_file):
             sentence = current_example['例文']
             
             # 音声再生
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-                tts = gTTS(sentence, lang='en')
-                tts.save(fp.name)
-                temp_filename = fp.name
+            # with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+            #     tts = gTTS(sentence, lang='en')
+            #     tts.save(fp.name)
+            #     temp_filename = fp.name
                 
             audio_col, button_col = st.columns([1, 1])
-            
+
             with audio_col:
-                with open(temp_filename, "rb") as audio_file:
-                    st.audio(audio_file.read(), format='audio/mp3')
+                # gTTSでメモリ上に音声生成
+                tts = gTTS(sentence, lang='en')
+                audio_bytes = BytesIO()
+                tts.write_to_fp(audio_bytes)
+                audio_bytes.seek(0)
+
+                st.audio(audio_bytes, format='audio/mp3')
+            
+            # with audio_col:
+            #     with open(temp_filename, "rb") as audio_file:
+            #         st.audio(audio_file.read(), format='audio/mp3')
             
             # 回答表示ボタン - キー名と変数名を異なるものにする
             with button_col:
@@ -140,11 +151,11 @@ if os.path.exists(excel_file):
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
             
-            # 一時ファイルの削除
-            try:
-                os.unlink(temp_filename)
-            except:
-                pass
+            # # 一時ファイルの削除
+            # try:
+            #     os.unlink(temp_filename)
+            # except:
+            #     pass
             
             # 回答表示
             if st.session_state.answer_visible:  # 変数名を変更
